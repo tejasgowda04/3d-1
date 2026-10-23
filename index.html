@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>3D Interior Crafter — Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ob:#0c1424;--ob2:#111b30;--gd:#e8a598;--iv:#F6F1E8;--sg:#7fa99b;--bg:var(--ob);--tx:var(--iv);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0c1424;--tx:#F6F1E8}}
+:root[data-theme="dark"]{--bg:#0c1424;--tx:#F6F1E8}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth;scroll-padding-top:70px}
+body{background:var(--bg);color:var(--tx);font:400 16px/1.7 Jost,system-ui,sans-serif;overflow-x:hidden}
+h1,h2,h3,.serif{font-family:'Playfair Display',Georgia,serif;font-weight:600;line-height:1.1}
+.gold{color:var(--gd)}a{color:inherit;text-decoration:none}
+section{padding:90px 6vw;position:relative}
+.eyebrow{letter-spacing:.35em;font-size:11px;text-transform:uppercase;color:var(--gd);margin-bottom:14px}
+h2{font-size:clamp(34px,5vw,60px);margin-bottom:18px}
+.btn{display:inline-block;padding:13px 28px;border:1px solid var(--gd);color:var(--ob);background:linear-gradient(110deg,#c4756a,#f5c2b6,#e8a598);background-size:200%;border-radius:40px;font-weight:500;font-size:14px;cursor:pointer;transition:.4s;position:relative;overflow:hidden}
+.btn:hover{background-position:100%;transform:translateY(-3px);box-shadow:0 10px 30px #e8a59855}
+.btn.o{background:none;color:var(--gd)}.btn.o:hover{background:#e8a59822}
+.btn.s{padding:8px 18px;font-size:12px}
+/* loader */
+#ld{position:fixed;inset:0;background:var(--ob);z-index:999;display:grid;place-items:center;text-align:center;transition:transform 1s cubic-bezier(.77,0,.18,1)}
+#ld.out{transform:translateY(-100%)}
+#ld svg{width:120px;height:140px}#ld path,#ld circle{fill:none;stroke:var(--gd);stroke-width:2;stroke-dasharray:400;stroke-dashoffset:400;animation:dr 2.2s ease forwards}
+#ld circle{animation-delay:1.2s;stroke-dasharray:100;stroke-dashoffset:100}
+@keyframes dr{to{stroke-dashoffset:0}}
+.nm{font-size:clamp(26px,6vw,52px);letter-spacing:.2em;margin-top:14px;display:flex;justify-content:center;flex-wrap:wrap;gap:0 .05em}
+.nm span{display:inline-block;opacity:0;transform:translateY(40px) rotateX(-90deg);animation:lt .8s forwards}
+@keyframes lt{to{opacity:1;transform:none}}
+.tg{letter-spacing:.5em;font-size:10px;color:var(--gd);margin-top:10px;opacity:0;animation:lt 1s 2.4s forwards}
+/* nav */
+nav{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:14px 6vw;transition:.4s}
+nav.sc{background:#0c1424dd;backdrop-filter:blur(14px);border-bottom:1px solid #e8a59833}
+.lg{font-size:20px;letter-spacing:.12em;display:flex;align-items:center;gap:10px}.lg i{width:26px;height:30px;border:1.5px solid var(--gd);border-radius:14px 14px 2px 2px;display:inline-block}
+.dl{display:flex;gap:26px;font-size:13px;letter-spacing:.08em}.dl a{position:relative}.dl a:after{content:"";position:absolute;left:0;bottom:-4px;height:1px;width:0;background:var(--gd);transition:.3s}.dl a:hover:after{width:100%}
+#mb{width:44px;height:44px;border-radius:50%;border:1px solid var(--gd);background:none;cursor:pointer;position:relative;z-index:130}
+#mb b{position:absolute;left:12px;width:20px;height:1.5px;background:var(--gd);transition:.4s}#mb b:nth-child(1){top:17px}#mb b:nth-child(2){top:25px}
+#mb.x b:nth-child(1){top:21px;transform:rotate(45deg)}#mb.x b:nth-child(2){top:21px;transform:rotate(-45deg)}
+#mn{position:fixed;inset:0;z-index:120;background:radial-gradient(circle at 80% 10%,#1a2a4d,#0c1424);clip-path:circle(0 at calc(100% - 50px) 40px);transition:clip-path .9s cubic-bezier(.77,0,.18,1);display:flex;flex-direction:column;justify-content:center;padding:0 10vw}
+#mn.o{clip-path:circle(150% at calc(100% - 50px) 40px)}
+#mn a{font:600 clamp(34px,7vw,64px) 'Playfair Display',serif;opacity:0;transform:translateX(-50px);transition:.6s;display:block;width:fit-content}
+#mn.o a{opacity:1;transform:none}#mn a:hover{color:var(--gd);padding-left:20px}
+@media(min-width:900px){#mb{display:none}}@media(max-width:899px){.dl{display:none}}
+/* hero */
+
+#sp{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.hg{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;width:100%;position:relative;z-index:2;padding-top:40px}
+@media(max-width:899px){.hg{grid-template-columns:1fr}}
+h1{font-size:clamp(40px,6.2vw,86px);line-height:1.05;margin-bottom:20px}
+h1 em{font-style:italic;background:linear-gradient(100deg,#c4756a,#ffe2da,#e8a598,#ffe2da);background-size:250%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:sh 5s linear infinite}
+@keyframes sh{to{background-position:250%}}
+.hero-art{position:relative;height:min(60vh,480px);perspective:1000px}
+.hero-art .fr{position:absolute;border:1px solid #e8a59888;border-radius:200px 200px 10px 10px;overflow:hidden;box-shadow:0 40px 80px #000a;transition:transform .2s}
+.fr img{width:100%;height:100%;object-fit:cover}
+.f1{inset:0 18% 0 0;animation:fl 7s ease-in-out infinite}.f2{inset:18% 0 -4% 48%;animation:fl 8s -3s ease-in-out infinite}
+@keyframes fl{50%{transform:translateY(-18px) rotateZ(1deg)}}
+.stats{display:flex;gap:34px;margin-top:40px;flex-wrap:wrap}.stats b{font:600 38px 'Playfair Display',serif;color:var(--gd);display:block}.stats span{font-size:12px;letter-spacing:.1em}
+.mq{overflow:hidden;border-block:1px solid #e8a59844;padding:14px 0;background:var(--ob2);white-space:nowrap}
+.mq div{display:inline-block;animation:mq 30s linear infinite;font:600 24px 'Playfair Display',serif;color:var(--gd)}.mq span{margin:0 26px}
+@keyframes mq{to{transform:translateX(-50%)}}
+/* reveal */
+[data-a]{opacity:0;transition:opacity 1s,transform 1s cubic-bezier(.2,.8,.2,1)}
+[data-a=up]{transform:translateY(60px)}[data-a=left]{transform:translateX(-80px)}[data-a=right]{transform:translateX(80px)}[data-a=pop]{transform:scale(.7) translateY(30px)}
+[data-a].in{opacity:1;transform:none}
+/* about */
+#about{background:var(--iv);color:var(--ob)}#about h2 em{color:#c4756a}
+.ag{display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:center}@media(max-width:899px){.ag{grid-template-columns:1fr}}
+.abi{border-radius:300px 300px 12px 12px;overflow:hidden;aspect-ratio:3/4;box-shadow:0 30px 60px #0004;position:relative}.abi img{width:100%;height:100%;object-fit:cover}
+.abi:after,.card:after,.pk:after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 40%,#ffffff55 50%,transparent 60%);transform:translateX(-100%);transition:.9s;pointer-events:none}
+.abi:hover:after,.card:hover:after,.pk:hover:after{transform:translateX(100%)}
+.pil{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:26px}.pil div{padding:16px;border:1px solid #e8a59888;border-radius:12px;font-size:13px}.pil b{display:block;font:600 20px 'Playfair Display',serif;color:#c4756a}
+/* services */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:22px;margin-top:34px;perspective:1200px}
+.card{position:relative;padding:32px 26px;border-radius:18px;background:linear-gradient(145deg,#17254a,#0f1a33);border:1px solid #e8a59844;overflow:hidden;transform-style:preserve-3d;transition:transform .15s,border-color .3s;--mx:50%;--my:50%}
+.card:before{content:"";position:absolute;inset:0;background:radial-gradient(300px circle at var(--mx) var(--my),#e8a59833,transparent 60%);opacity:0;transition:.3s}.card:hover:before{opacity:1}.card:hover{border-color:var(--gd)}
+.card .ic{font-size:34px;color:var(--gd);margin-bottom:12px;transform:translateZ(40px);display:block}.card h3{font-size:26px;margin-bottom:8px;transform:translateZ(25px)}.card p{font-size:14px;opacity:.8}
+/* projects */
+#projects{background:var(--ob2);overflow:hidden}
+.car{height:380px;perspective:1300px;margin:30px auto 10px;max-width:1000px;position:relative;touch-action:pan-y}
+.ci{position:absolute;left:50%;top:50%;width:min(260px,62vw);height:340px;margin:-170px 0 0 calc(min(260px,62vw)/-2);transform-style:preserve-3d;transition:transform 1s cubic-bezier(.2,.8,.2,1)}
+.ci div{position:absolute;inset:0;border-radius:14px;overflow:hidden;border:1px solid #e8a59888;box-shadow:0 20px 50px #000a;-webkit-box-reflect:below 4px linear-gradient(transparent 75%,#0004)}
+.ci img{width:100%;height:100%;object-fit:cover}.ci span{position:absolute;left:0;right:0;bottom:0;padding:30px 14px 12px;background:linear-gradient(transparent,#000c);font:600 18px 'Playfair Display',serif}
+.ctl{text-align:center}.ctl button{width:46px;height:46px;border-radius:50%;border:1px solid var(--gd);background:none;color:var(--gd);font-size:18px;cursor:pointer;margin:0 8px;transition:.3s}.ctl button:hover{background:var(--gd);color:var(--ob)}
+.flt{display:flex;gap:10px;flex-wrap:wrap;margin:50px 0 24px}.flt button{padding:9px 20px;border-radius:30px;border:1px solid #e8a59866;background:none;color:var(--iv);cursor:pointer;font-size:13px;transition:.3s}.flt button.on,.flt button:hover{background:var(--gd);color:var(--ob)}
+.pg{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px}
+.pi{position:relative;aspect-ratio:4/3;border-radius:14px;overflow:hidden;cursor:pointer;animation:pp .6s backwards}.pi img{width:100%;height:100%;object-fit:cover;transition:transform .8s}.pi:hover img{transform:scale(1.12) rotate(1deg)}
+.pi div{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:16px;background:linear-gradient(transparent 40%,#000d);opacity:0;transition:.4s}.pi:hover div{opacity:1}.pi b{font:600 22px 'Playfair Display',serif}.pi small{color:var(--gd)}
+@keyframes pp{from{opacity:0;transform:scale(.8)}}
+/* packages */
+.pk{position:relative;padding:34px 28px;border-radius:20px;border:1px solid #e8a59855;background:#15213a;overflow:hidden;transition:.4s}.pk:hover{transform:translateY(-10px);box-shadow:0 30px 60px #e8a59822}
+.pk.hot{background:linear-gradient(160deg,#1a2d52,#0f1a33);border-color:var(--gd)}.pk .tag{position:absolute;top:16px;right:-34px;transform:rotate(40deg);background:var(--gd);color:var(--ob);font-size:10px;padding:3px 40px;letter-spacing:.1em}
+.pr{font:600 48px 'Playfair Display',serif;color:var(--gd);margin:8px 0 14px}.pk ul{list-style:none;margin-bottom:22px;font-size:14px}.pk li{padding:5px 0 5px 24px;position:relative}.pk li:before{content:"✦";position:absolute;left:0;color:var(--gd);font-size:11px;top:9px}
+/* demo */
+#demo{background:radial-gradient(ellipse at 20% 0,#2a4a5233,transparent 50%),var(--ob)}
+.warn{display:inline-block;background:#7fa99b33;border:1px dashed var(--sg);padding:6px 14px;border-radius:8px;font-size:12px;margin-bottom:18px;color:#c5cdb6}
+.tabs{display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap}.tabs button{padding:10px 22px;border-radius:30px;border:1px solid #e8a59866;background:none;color:var(--iv);cursor:pointer;font-size:13px;transition:.3s}.tabs button.on{background:var(--gd);color:var(--ob)}
+.pn{display:none;animation:pp .5s}.pn.on{display:block}
+.box{background:#15213a;border:1px solid #e8a59833;border-radius:16px;padding:22px;margin-bottom:18px}.box h3{font-size:24px;margin-bottom:12px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}@media(max-width:799px){.two{grid-template-columns:1fr}}
+.bar{height:10px;background:#ffffff14;border-radius:10px;overflow:hidden;margin:8px 0}.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--sg),var(--gd));transition:width 1.4s;border-radius:10px}
+.ms{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #ffffff14;font-size:14px;flex-wrap:wrap}
+.st{font-size:11px;padding:3px 10px;border-radius:20px;background:#ffffff14}.st.p{background:#7fa99b66}.st.w{background:#e8a59844;color:var(--gd)}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 8px;text-align:left;border-bottom:1px solid #ffffff12}th{color:var(--gd);font-weight:500;letter-spacing:.08em;font-size:11px}
+.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:18px}.sg div{background:#15213a;border:1px solid #e8a59833;border-radius:12px;padding:14px}.sg b{font:600 30px 'Playfair Display',serif;color:var(--gd);display:block}
+.ph{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.ph img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px}
+.tabw{overflow-x:auto}
+/* contact */
+#contact{background:var(--iv);color:var(--ob)}input,select,textarea{width:100%;padding:13px 16px;border-radius:10px;border:1px solid #0c142444;background:#fff8;font:inherit;margin-bottom:12px;color:var(--ob)}
+.cg{display:grid;grid-template-columns:1fr 1fr;gap:40px}@media(max-width:899px){.cg{grid-template-columns:1fr}}
+.ct div{padding:16px 0;border-bottom:1px solid #0c142422}.ct b{font:600 22px 'Playfair Display',serif;color:#c4756a;display:block}
+footer{background:#080e1a;text-align:center;padding:30px;font-size:12px;opacity:.9}
+/* modal+toast */
+#md{position:fixed;inset:0;background:#000b;z-index:300;display:none;place-items:center;padding:20px;backdrop-filter:blur(6px)}#md.o{display:grid}
+#mc{background:#15213a;border:1px solid var(--gd);border-radius:20px;padding:30px;max-width:420px;width:100%;text-align:center;animation:pp .4s}
+.sp{width:46px;height:46px;border:3px solid #e8a59844;border-top-color:var(--gd);border-radius:50%;margin:20px auto;animation:rt 1s linear infinite}@keyframes rt{to{transform:rotate(360deg)}}
+.ok{font-size:54px;color:var(--sg)}
+#tt{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,120px);background:var(--gd);color:var(--ob);padding:12px 24px;border-radius:30px;z-index:400;transition:.5s;font-size:14px;max-width:90vw}#tt.o{transform:translate(-50%,0)}
+.view{display:none}.view.on{display:block;animation:pp .5s}#demo{display:none}
+.bn{display:grid;grid-template-columns:repeat(6,1fr);grid-auto-rows:92px;gap:12px;position:relative;z-index:2}
+.bn>div{position:relative;border:1px solid #e8a59855;border-radius:16px;padding:14px;background:linear-gradient(145deg,#1a2a4ddd,#0f1a33dd);backdrop-filter:blur(8px);overflow:hidden;animation:fl 6s ease-in-out infinite;display:flex;flex-direction:column;justify-content:flex-end;transition:.4s}
+.bn>div:nth-child(even){animation-delay:-3s}.bn>div:hover{border-color:var(--gd);transform:translateY(-6px) scale(1.03)}
+.bn>div:after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 40%,#e8a59844 50%,transparent 60%);transform:translateX(-100%);animation:sw 4.5s infinite}
+@keyframes sw{60%,100%{transform:translateX(100%)}}
+.bn b{font:600 28px 'Playfair Display',serif;color:var(--gd);line-height:1}.bn small{font-size:11px;letter-spacing:.08em;opacity:.85}.bn .s2{grid-column:span 2}.bn .s3{grid-column:span 3}.bn .s6{grid-column:span 6}.bn .r2{grid-row:span 2}
+.tgs{display:flex;flex-wrap:wrap;gap:8px;align-content:center}.tgs span{padding:6px 14px;border:1px solid #e8a59888;border-radius:30px;font-size:12px;letter-spacing:.06em;background:#e8a59814}
+#about .bn>div{background:linear-gradient(145deg,#fffdf8,#efe6d4);color:var(--ob)}#about .bn b{color:#c4756a}#about .bn{grid-auto-rows:120px}
+@media(max-width:560px){.bn b{font-size:22px}.bn .s2{grid-column:span 3}}
+.cf{position:relative;height:430px;perspective:1200px;margin-top:30px;overflow:hidden;touch-action:pan-y}
+.cfi{position:absolute;left:50%;top:20px;width:min(270px,64vw);height:360px;margin-left:calc(min(270px,64vw)/-2);border-radius:26px;overflow:hidden;border:1px solid #ffffff2a;transition:transform .8s cubic-bezier(.2,.8,.2,1),filter .8s,opacity .8s;cursor:pointer;background:#000}
+.cfi img{width:100%;height:100%;object-fit:cover}.cfi div{position:absolute;left:0;right:0;bottom:0;padding:44px 18px 16px;background:linear-gradient(transparent,#000d)}.cfi small{color:var(--gd);font-size:13px}.cfi b{display:block;font:600 26px 'Playfair Display',serif;line-height:1.1}
+.cf:after{content:"";position:absolute;left:8%;right:8%;bottom:10px;height:44px;background:radial-gradient(ellipse,#e8a59877,transparent 70%);filter:blur(10px);pointer-events:none}
+.hd{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 6vw;border-bottom:1px solid #e8a59833;position:sticky;top:env(safe-area-inset-top,0px);background:#0c1424ee;backdrop-filter:blur(12px);z-index:50}.hd small{font-size:12px;color:var(--gd)}
+.lw{min-height:85vh;display:grid;place-items:center;padding:30px 6vw;background:radial-gradient(circle at 50% 0,#1c2f55,transparent 60%)}
+.lc{max-width:400px;width:100%;padding:34px 28px;border:1px solid var(--gd);border-radius:22px;background:#15213a;box-shadow:0 30px 80px #000a;animation:pp .6s}
+.dw{max-width:1150px;margin:auto;padding:30px 6vw 60px}
+.tl div{padding:0 0 18px 26px;position:relative;font-size:14px;opacity:.45;border-left:1px solid #e8a59844;margin-left:8px}.tl div:before{content:"";position:absolute;left:-7px;top:5px;width:13px;height:13px;border-radius:50%;background:var(--ob);border:1.5px solid var(--gd)}
+.tl .d{opacity:1}.tl .d:before{background:var(--gd)}.tl .a{opacity:1;color:var(--gd)}.tl .a:before{background:var(--gd);animation:pu 1.5s infinite}@keyframes pu{0%,100%{box-shadow:0 0 0 3px #e8a59855}50%{box-shadow:0 0 0 11px #e8a59800}}
+.pmx.on{background:var(--gd);color:var(--ob)}.dw select.m{width:auto;margin:0;padding:6px 10px}
+.sh{animation:shk .4s}@keyframes shk{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.bn>div{animation:none}
+.lead{max-width:480px;opacity:.85;margin-bottom:28px;font-size:17px}.hb{display:flex;gap:12px;flex-wrap:wrap}
+.hcards{display:grid;grid-template-columns:1fr 1fr;gap:14px;position:relative;z-index:2}.hcards>div{padding:22px 20px;border:1px solid #e8a59855;border-radius:18px;background:linear-gradient(145deg,#17254aee,#0f1a33ee);backdrop-filter:blur(8px)}
+.hcards>div:hover{transform:translateY(-6px)!important;border-color:var(--gd)}.hcards b{display:block;font:600 34px 'Playfair Display',serif;color:var(--gd);line-height:1}.hcards small{display:block;margin-top:8px;font-size:11px;letter-spacing:.1em;opacity:.8}.hcards .w{grid-column:span 2}
+#reviews{background:var(--ob2);overflow:hidden}.ts{display:flex;gap:20px;overflow-x:auto;scroll-snap-type:x mandatory;padding:14px 4px 22px;scrollbar-width:none}.ts::-webkit-scrollbar{display:none}
+.tc{flex:0 0 min(380px,82vw);scroll-snap-align:start;padding:30px 26px;border:1px solid #e8a59844;border-radius:20px;background:linear-gradient(150deg,#17254a,#0f1a33);transition:.4s}.tc:hover{transform:translateY(-8px);border-color:var(--gd)}
+.stars{color:var(--gd);letter-spacing:4px;margin-bottom:12px}.tc p{font:italic 500 20px/1.5 'Playfair Display',serif;margin-bottom:22px}.who{display:flex;align-items:center;gap:12px}.who i{width:44px;height:44px;border-radius:50%;background:var(--sg);color:var(--ob);display:grid;place-items:center;font:600 20px 'Playfair Display',serif;font-style:normal}.who b{display:block;font-size:14px}.who small{opacity:.7;font-size:12px}
+.dots{display:flex;justify-content:center;gap:8px;margin-top:6px}.dots button{width:9px;height:9px;border-radius:9px;border:0;background:#ffffff33;cursor:pointer;transition:.4s}.dots button.on{width:28px;background:var(--gd)}
+#home{min-height:100vh;display:flex;align-items:center;overflow:hidden;background:#0c1424}
+#home:before{content:"";position:absolute;inset:0;background:url(https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1800&q=70) center/cover;animation:kb 24s ease-in-out infinite alternate}
+#home:after{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(95deg,#0c1424f2 0%,#0c1424cc 48%,#0c142470 100%),linear-gradient(transparent 70%,#0c1424)}
+@keyframes kb{to{transform:scale(1.12) translateX(-1.5%)}}#sp{z-index:2;opacity:.6}
+.bgi{position:relative;isolation:isolate}.bgi:before{content:"";position:absolute;inset:0;z-index:-2;background:var(--bi) center/cover fixed}.bgi:after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(#0c1424ea,#0c1424bb 50%,#0c1424ea)}
+</style></head><body>
+<div id="ld"><div><svg viewBox="0 0 120 140"><path d="M20 130V60C20 25 45 10 60 10s40 15 40 50v70M34 130V62c0-22 14-34 26-34s26 12 26 34v68M10 130h100"/><circle cx="60" cy="78" r="6"/></svg><div class="nm serif" id="nm"></div><div class="tg">DESIGN · VISUALIZE · TRANSFORM</div></div></div>
+
+<nav id="nv"><a class="lg serif" href="#home"><i></i>3D INTERIOR CRAFTER</a><div class="dl"><a href="#about">About</a><a href="#services">Services</a><a href="#projects">Projects</a><a href="#packages">Packages</a><a href="#reviews">Reviews</a><a href="customer.html">Customer Login</a><a href="admin.html">Admin</a><a href="#contact">Contact</a></div><button id="mb" aria-label="Menu"><b></b><b></b></button></nav>
+<div id="mn"><a href="#home">Home</a><a href="#about">About</a><a href="#services">Services</a><a href="#projects">Projects</a><a href="#packages">Packages</a><a href="#reviews">Reviews</a><a href="customer.html">Customer Login</a><a href="admin.html">Admin</a><a href="#contact">Contact</a></div>
+
+<section id="home"><canvas id="sp"></canvas><div class="hg"><div>
+<p class="eyebrow" data-a="up" style="transition-delay:3.20s">Pune · Mumbai · Pan India</p>
+<h1 data-a="up" style="transition-delay:3.35s">Design the home <em>you’ll love</em>, in 3D.</h1>
+<p class="lead" data-a="up" style="transition-delay:3.50s">Photoreal 3D interior design, room by room. See every material, light and layout before work begins.</p>
+<div class="hb" data-a="up" style="transition-delay:3.65s"><a href="#contact" class="btn">Book free consultation</a><a href="#projects" class="btn o">View projects</a></div>
+<div class="stats" data-a="up" style="transition-delay:3.80s"><div><b data-n="434">0</b><span>Designs crafted</span></div><div><b data-n="12">0</b><span>Cities served</span></div><div><b data-n="100">0</b><span>% 3D realistic</span></div></div></div>
+<div class="hcards"><div data-a="pop" style="transition-delay:3.50s"><b>₹3,000</b><small>PREMIUM 3D DESIGN PER ROOM</small></div><div data-a="pop" style="transition-delay:3.65s"><b>4K</b><small>PHOTOREAL RENDERS</small></div><div data-a="pop" style="transition-delay:3.80s"><b>Pan India</b><small>REMOTE DESIGN SERVICE</small></div><div data-a="pop" style="transition-delay:3.95s"><b>SketchUp</b><small>FILES ON REQUEST</small></div><div class="w tgs" data-a="up" style="transition-delay:4.10s"><span>Living</span><span>Bedrooms</span><span>Kitchens</span><span>TV units</span><span>Pooja rooms</span><span>Turnkey</span></div></div></div></section>
+<div class="mq"><div id="mq"></div></div>
+
+<section id="about"><div class="ag"><div class="bn" data-a="left"><div class="s3"><b>01 · Listen</b><small>BRIEF, BUDGET &amp; LIFESTYLE</small></div><div class="s3"><b>02 · Visualize</b><small>PHOTOREAL 3D RENDERS</small></div><div class="s3"><b>03 · Refine</b><small>MATERIALS, LIGHT &amp; LAYOUT</small></div><div class="s3"><b>04 · Deliver</b><small>TURNKEY EXECUTION</small></div><div class="s6 tgs" style="background:none;border:0"><span>No ChatGPT work</span><span>Original designs</span><span>SketchUp ready</span><span>Pune · Mumbai</span><span>Pan India</span></div></div><div data-a="right"><p class="eyebrow">About the Studio</p><h2>Where imagination meets <em>precision</em></h2><p>We are a 3D interior design and visualization studio crafting homes across Pune, Mumbai and all of India. Every room is modelled in 3D first, so you approve materials, lighting and layout long before execution.</p><div class="pil"><div><b>Listen</b>Your lifestyle first</div><div><b>Visualize</b>Photoreal 3D renders</div><div><b>Deliver</b>Turnkey execution</div></div><br><a href="#contact" class="btn">Talk to a Designer</a></div></div></section>
+
+<section id="services" class="bgi" style="--bi:url(https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1600&q=70)"><p class="eyebrow" data-a="up">What We Do</p><h2 data-a="up">Services crafted for <span class="gold">living</span></h2><div class="grid" id="sv"></div></section>
+
+<section id="projects"><p class="eyebrow" data-a="up">Portfolio</p><h2 data-a="up">Featured <span class="gold">designs</span></h2>
+<p style="opacity:.7;font-size:14px" data-a="up">Swipe to browse. Tap the centre photo to view it full screen.</p><div class="cf" id="cf"></div><div class="ctl"><button id="cp">←</button><button id="cn">→</button></div>
+<div class="flt" id="fl"></div><div class="pg" id="pg"></div></section>
+
+<section id="packages" class="bgi" style="--bi:url(https://images.unsplash.com/photo-1556912172-45b7abe8b7e1?auto=format&fit=crop&w=1600&q=70)"><p class="eyebrow" data-a="up">Pricing</p><h2 data-a="up">Choose your <span class="gold">package</span></h2><p style="opacity:.7" data-a="up">Sample pricing for demonstration.</p><div class="grid" id="pks"></div></section>
+
+<section id="reviews" class="bgi" style="--bi:url(https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1600&q=70)"><p class="eyebrow" data-a="up">Testimonials</p><h2 data-a="up">Loved by <span class="gold">homeowners</span></h2><p style="opacity:.6;font-size:13px;margin-bottom:10px">Sample reviews for demo. Swipe or wait, it slides on its own.</p><div class="ts" id="ts"></div><div class="dots" id="dots"></div></section>
+<section id="contact"><div class="cg"><div data-a="left"><p class="eyebrow">Get in Touch</p><h2>Start your <em class="gold">consultation</em></h2><form id="fm"><input id="fn" placeholder="Your name" required><input placeholder="Phone (demo — not stored)" required><select id="fs"></select><textarea rows="3" placeholder="Tell us about your space"></textarea><button class="btn" type="submit">Request Consultation</button></form></div>
+<div class="ct" data-a="right"><div><b>Pune</b>Head studio · Maharashtra 411033</div><div><b>Mumbai</b>Turnkey project hub</div><div><b>Pan India</b>Remote 3D design service, SketchUp files on request</div><div><b>Demo contact</b>+91 93222 97305</div></div></div></section>
+<footer>© 3D Interior Crafter · Prototype website — demo content only · <a href="customer.html" class="gold">Customer Portal</a> · <a href="admin.html" class="gold">Admin</a></footer><div id="md"><div id="mc"></div></div><div id="tt"></div>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+function T(m){const t=$('#tt');t.textContent=m;t.classList.add('o');clearTimeout(T.t);T.t=setTimeout(()=>t.classList.remove('o'),2800)}
+/* illustrated rooms (no remote images) */
+const IMG={living:['1618221195710-dd6b41faaea6','1586023492125-27b2c045efd7','1493663284031-b7e3aefcae8e','1502672260266-1c1ef2d93688'],bedroom:['1616486338812-3dadae4b4ace','1540518614846-7eded433c457','1505693416388-ac5ce068fe85'],kitchen:['1556912172-45b7abe8b7e1','1556909114-f6e7ad7d3136','1484154218962-a197022b5858'],tv:['1600607687939-ce8a6c25118c','1600566753190-17f0baa2a6c3','1565538810643-b5bdb714032a'],render:['1600210492486-724fe5c67fb0','1600585154340-be6161a56a0c','1560448204-e02f11c3d0e2']};
+const room=(c,i=0,w=900)=>{const a=IMG[c]||IMG.living;return 'https://images.unsplash.com/photo-'+a[i%a.length]+'?auto=format&fit=crop&w='+w+'&q=70'};
+document.addEventListener('error',e=>{if(e.target.tagName=='IMG')e.target.style.opacity=0},true);
+$$('img[data-r]').forEach(i=>{const[c,n]=i.dataset.r.split(',');i.src=room(c,+n)});
+/* loader name reveal */
+const NAME='3D INTERIOR CRAFTER';$('#nm').innerHTML=[...NAME].map((c,i)=>`<span style="animation-delay:${.3+i*.07}s">${c==' '?'&nbsp;':c}</span>`).join('');
+
+setTimeout(()=>{$('#ld').classList.add('out');document.body.style.overflow='';count()},3400);document.body.style.overflow='hidden';
+/* nav */
+const mb=$('#mb'),mn=$('#mn');mb.onclick=()=>{mb.classList.toggle('x');mn.classList.toggle('o');$$('#mn a').forEach((a,i)=>a.style.transitionDelay=mn.classList.contains('o')?(.35+i*.08)+'s':'0s')};
+$$('#mn a').forEach(a=>a.onclick=()=>{mb.classList.remove('x');mn.classList.remove('o')});
+addEventListener('scroll',()=>$('#nv').classList.toggle('sc',scrollY>40));
+/* data */
+const SV=[['◈','3D Visualization','Photorealistic renders and walkthroughs of every room before execution.'],['⌂','Residential Interiors','Complete 2 BHK, 3 BHK and villa interiors tailored to your lifestyle.'],['▦','Room-wise Design','Pay per room—premium 3D design for just the spaces you need.'],['❖','Modular Kitchens','Functional, modern kitchens with premium finishes and storage.'],['✦','Turnkey Projects','Design to handover in Pune and Mumbai—one team, zero stress.']];
+$('#sv').innerHTML=SV.map((s,i)=>`<div class="card tilt" data-a="pop" style="transition-delay:${i*.1}s"><span class="ic">${s[0]}</span><h3>${s[1]}</h3><p>${s[2]}</p></div>`).join('');
+$('#mq').innerHTML=('<span>3D Visualization</span><span>✦</span><span>Modular Kitchens</span><span>✦</span><span>Turnkey Projects</span><span>✦</span><span>Pan India Service</span><span>✦</span>').repeat(6);
+$('#fs').innerHTML='<option value="">Select a service</option>'+SV.map(s=>`<option>${s[1]}</option>`).join('');
+const PR=[['Ivory Lounge','living'],['Sage Suite','bedroom'],['Modern Galley','kitchen'],['Walnut Media Wall','tv'],['Penthouse Render','render'],['Gold Living','living'],['Cloud Bedroom','bedroom'],['Island Kitchen','kitchen'],['Fluted TV Unit','tv'],['Villa Render','render']].map((p,i)=>({n:p[0],c:p[1],i}));
+const CAT={living:'Living Rooms',bedroom:'Bedrooms',kitchen:'Kitchens',tv:'TV Units',render:'3D Renders'};
+/* filters */
+const fl=$('#fl');fl.innerHTML=['all',...Object.keys(CAT)].map(k=>`<button data-k="${k}" class="${k=='all'?'on':''}">${k=='all'?'All':CAT[k]}</button>`).join('');
+function grid(k){$('#pg').innerHTML=PR.filter(p=>k=='all'||p.c==k).map((p,j)=>`<div class="pi" style="animation-delay:${j*.06}s"><img src="${room(p.c,p.i)}" alt=""><div><small>${CAT[p.c]}</small><b>${p.n}</b></div></div>`).join('')}
+grid('all');fl.onclick=e=>{const k=e.target.dataset.k;if(!k)return;$$('#fl button').forEach(b=>b.classList.toggle('on',b==e.target));grid(k)};
+/* packages */
+const PK=[['Basic','Start Your Online Presence','₹8,000',['4–5 page website','Gallery up to 20 images','Enquiry form','WhatsApp integration','Basic SEO']],['Premium','Complete Business Solution','₹12,000',['Everything in Basic','Unlimited gallery','Quote form','Google Maps','1 year hosting'],1],['Professional','Premium & Growth-Focused','₹18,000',['Everything in Premium','Custom UI/UX','Animations','Lead tracking','Priority support']]];
+$('#pks').innerHTML=PK.map((p,i)=>`<div class="pk tilt ${p[4]?'hot':''}" data-a="up" style="transition-delay:${i*.15}s">${p[4]?'<span class="tag">POPULAR</span>':''}<h3 class="serif" style="font-size:30px">${p[0]}</h3><small style="opacity:.7">${p[1]}</small><div class="pr">${p[2]}</div><ul>${p[3].map(x=>`<li>${x}</li>`).join('')}</ul><a href="#contact" class="btn s" onclick="$('#fs').selectedIndex=2">Book Consultation</a></div>`).join('');
+/* tilt */
+document.addEventListener('mousemove',e=>{const c=e.target.closest&&e.target.closest('.tilt');if(!c)return;const r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;c.style.setProperty('--mx',x*100+'%');c.style.setProperty('--my',y*100+'%');c.style.transform=`rotateY(${(x-.5)*14}deg) rotateX(${(.5-y)*14}deg) translateZ(10px)`});
+document.addEventListener('mouseout',e=>{const c=e.target.closest&&e.target.closest('.tilt');if(c)c.style.transform=''});
+addEventListener('mousemove',e=>{const h=$('#ha');if(!h)return;const x=(e.clientX/innerWidth-.5),y=(e.clientY/innerHeight-.5);$$('.fr').forEach((f,i)=>f.style.translate=`${x*(i?-30:30)}px ${y*20}px`)});
+/* reveal + counters */
+const io=new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting&&(e.target.classList.add('in'),io.unobserve(e.target))),{threshold:.15});$$('[data-a]').forEach(e=>io.observe(e));
+function count(){$$('[data-n]').forEach(e=>{const n=+e.dataset.n;let v=0;const t=setInterval(()=>{v+=Math.ceil(n/50);if(v>=n){v=n;clearInterval(t)}e.textContent=v+(n==434?'+':'')},30)})}
+/* sparkles */
+const cv=$('#sp'),cx=cv.getContext('2d');let P=[];function rs(){cv.width=cv.offsetWidth;cv.height=cv.offsetHeight}rs();addEventListener('resize',rs);
+for(let i=0;i<35;i++)P.push({x:Math.random(),y:Math.random(),r:Math.random()*2+.5,s:Math.random()*.0004+.0001,p:Math.random()*6});
+(function a(t){cx.clearRect(0,0,cv.width,cv.height);P.forEach(p=>{p.y-=p.s;if(p.y<0)p.y=1;const o=.3+.7*Math.abs(Math.sin(t/700+p.p)),x=p.x*cv.width,y=p.y*cv.height;cx.fillStyle=`rgba(230,201,141,${o})`;cx.beginPath();cx.moveTo(x,y-p.r*3);cx.lineTo(x+p.r*.6,y);cx.lineTo(x,y+p.r*3);cx.lineTo(x-p.r*.6,y);cx.fill();cx.beginPath();cx.moveTo(x-p.r*3,y);cx.lineTo(x,y+p.r*.6);cx.lineTo(x+p.r*3,y);cx.lineTo(x,y-p.r*.6);cx.fill()});requestAnimationFrame(a)})(0);
+/* ===== coverflow ===== */
+let ci=0;const CF=PR.slice(0,8),cfe=$('#cf');
+cfe.innerHTML=CF.map((p,i)=>`<div class="cfi" data-i="${i}"><img src="${room(p.c,p.i)}" alt=""><div><small>Completed</small><b>${p.n}</b></div></div>`).join('');
+function cfr(){const n=CF.length;$$('.cfi').forEach((e,i)=>{let d=((i-ci)%n+n)%n;if(d>n/2)d-=n;const a=Math.abs(d),w=innerWidth<600?62:72;e.style.transform=`translateX(${d*w}%) translateZ(${-a*150}px) rotateY(${-d*30}deg) scale(${1-a*.07})`;e.style.zIndex=10-a;e.style.filter=a?`blur(${Math.min(a*3,7)}px) brightness(.6)`:'none';e.style.opacity=a>2?0:1;e.style.pointerEvents=a>2?'none':''})}
+function zlb(src,t=''){$('#md').classList.add('o');$('#mc').style.maxWidth='560px';$('#mc').innerHTML=`<img src="${src}" style="width:100%;border-radius:12px"><p class="serif" style="font-size:24px;margin:10px 0">${t}</p><button class="btn s" onclick="$('#md').classList.remove('o')">Close</button>`}
+cfr();let cfa=1,cs=null;$('#cp').onclick=()=>{ci=(ci-1+CF.length)%CF.length;cfr()};$('#cn').onclick=()=>{ci=(ci+1)%CF.length;cfr()};
+setInterval(()=>{if(cfa){ci=(ci+1)%CF.length;cfr()}},3500);cfe.onmouseenter=()=>cfa=0;cfe.onmouseleave=()=>cfa=1;addEventListener('resize',cfr);
+cfe.addEventListener('pointerdown',e=>cs=e.clientX);
+cfe.addEventListener('pointerup',e=>{if(cs===null)return;const d=e.clientX-cs;cs=null;if(Math.abs(d)>35){ci=(ci+(d<0?1:-1)+CF.length)%CF.length;cfr();return}const c=e.target.closest('.cfi');if(!c)return;const i=+c.dataset.i;if(i==ci)zlb(c.querySelector('img').src,CF[i].n);else{ci=i;cfr()}});
+const RV=[['Riya Sharma','Baner, Pune','The 3D renders matched the final home almost exactly. No surprises, just a beautiful result.'],['Arjun Mehta','Andheri, Mumbai','Room-wise pricing let us start with the bedroom and add the kitchen later.'],['Sana Sheikh','Wakad, Pune','Quick revisions, clear milestones, and payment tracking made everything easy.'],['Kiran Patil','Nashik','They designed our 2 BHK remotely and the SketchUp file helped our contractor a lot.'],['Meera Iyer','Bengaluru','Modern, warm and practical. The kitchen layout is exactly what we imagined.'],['Rahul Desai','Thane','Turnkey service saved us weeks, from design to handover.']];
+const ts=$('#ts'),dts=$('#dots');ts.innerHTML=RV.map(r=>`<div class="tc"><div class="stars">★★★★★</div><p>“${r[2]}”</p><div class="who"><i>${r[0][0]}</i><span><b>${r[0]}</b><small>${r[1]}</small></span></div></div>`).join('');
+dts.innerHTML=RV.map((_,i)=>`<button data-i="${i}" aria-label="Review ${i+1}"></button>`).join('');
+let ti=0,tp=0;const cw=()=>ts.firstElementChild.offsetWidth+20,tdot=()=>$$('#dots button').forEach((b,i)=>b.classList.toggle('on',i==ti)),tgo=i=>{ti=(i+RV.length)%RV.length;ts.scrollTo({left:ti*cw(),behavior:'smooth'});tdot()};
+dts.onclick=e=>{if(e.target.dataset.i!=null){tp=Date.now()+5000;tgo(+e.target.dataset.i)}};
+ts.addEventListener('scroll',()=>{const end=ts.scrollLeft>=ts.scrollWidth-ts.clientWidth-4,i=end?RV.length-1:Math.round(ts.scrollLeft/cw());if(i!=ti){ti=i;tdot()}});
+['pointerdown','touchstart','wheel'].forEach(ev=>ts.addEventListener(ev,()=>tp=Date.now()+5000,{passive:true}));
+setInterval(()=>{if(Date.now()>tp)ts.scrollLeft>=ts.scrollWidth-ts.clientWidth-4?tgo(0):tgo(ti+1)},3500);tdot();
+$('#fm').onsubmit=e=>{e.preventDefault();const s=$('#fs').value||'Room-wise Design',n=$('#fn').value||'Guest';try{const p=JSON.parse(localStorage.getItem('3dic-pend')||'[]');p.push({n,s,st:'Submitted'});localStorage.setItem('3dic-pend',JSON.stringify(p))}catch(x){}e.target.reset();T('✓ Request submitted (demo). Check Admin → Inquiries');};
+$('#md').onclick=e=>{if(e.target.id=='md')e.target.classList.remove('o')};
+</script></body></html>
